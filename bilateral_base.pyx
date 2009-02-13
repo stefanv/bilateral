@@ -12,7 +12,7 @@
 import numpy as np
 
 
-cdef extern from "arrayobject.h":
+cdef extern from "numpy/arrayobject.h":
     ctypedef int intp
     ctypedef extern class numpy.ndarray [object PyArrayObject]:
         cdef char *data
