@@ -1,4 +1,4 @@
-#   Copyright 2008, Nadav Horesh
+#   Copyright 2008,2009 Nadav Horesh
 #   nadavh at visionsense dot com
 #
 #   The software is licenced under BSD licence.
@@ -53,7 +53,8 @@ class Bilat_fcn(object):
         self.xy_ker = np.exp(-np.add.outer(x,x)/(2*spat_sig**2)).ravel()
         self.xy_ker /= self.xy_ker.sum()
         self.inten_sig = 2 * inten_sig**2
-        self.index = self.xy_size**2 // 2
+        # self.index in the coordinate of the middle point
+        self.index = (self.xy_size+1) * (self.xy_size // 2)
 
         ## An initialization for LUT instead of a Gaussian function call
         ## (for the fc_filter method)
@@ -120,8 +121,3 @@ class Bilat_fcn(object):
             weight += weight_i;
             result += dat_i * weight_i
         return result / weight
-
-
-#
-# Filtering functions to be called from outsize
-#
