@@ -9,17 +9,7 @@
   function in orde to render the actual filter.
 '''
 
-import numpy as np
-
-
-cdef extern from "numpy/arrayobject.h":
-    ctypedef int intp
-    ctypedef extern class numpy.ndarray [object PyArrayObject]:
-        cdef char *data
-        cdef int nd
-        cdef intp *dimensions
-        cdef intp *strides
-        cdef int flags
+cimport numpy as np
 
 cdef extern from "math.h":
     double exp(double x)
@@ -73,9 +63,9 @@ class Bilat_fcn(object):
         weight = np.exp(-(data-data[self.index])**2/self.inten_sig) * self.xy_ker
         return np.dot(data, weight) / weight.sum()
 
-    def cfilter(self, ndarray data):
+    def cfilter(self, np.ndarray data):
         'An optimized implementation'
-        cdef ndarray kernel = self.xy_ker
+        cdef np.ndarray kernel = self.xy_ker
         cdef double sigma   = self.inten_sig
         cdef double weight_i, weight, result, centre, dat_i
         cdef double *pdata=<double *>data.data, *pker=<double *>kernel.data
@@ -93,10 +83,10 @@ class Bilat_fcn(object):
         return result / weight
 
 
-    def fc_filter(self, ndarray data):
+    def fc_filter(self, np.ndarray data):
         'Use further optimisation by replacing exp functions calls by a LUT'
-        cdef ndarray kernel = self.xy_ker
-        cdef ndarray gauss_lut_arr = self.gauss_lut
+        cdef np.ndarray kernel = self.xy_ker
+        cdef np.ndarray gauss_lut_arr = self.gauss_lut
 
         cdef double sigma   = self.inten_sig
         cdef double weight_i, weight, result, centre, dat_i
