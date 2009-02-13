@@ -1,12 +1,14 @@
+#   Copyright 2008, Nadav Horesh
+#   nadavh at visionsense dot com
+#
+#   The software is licenced under BSD licence.
 '''
   A cython implementation of the plain (and slow) algorithm for bilateral
   filtering.
-
-  Copyright 2008, Nadav Horesh
-  nadavh at visionsense.com 
+  The class Bilat_fcn exposes methods to be called by nd_image.generic_filter
+  function in orde to render the actual filter.
 '''
 
-from numpy.numarray.nd_image import generic_filter
 import numpy as np
 
 
@@ -22,14 +24,13 @@ cdef extern from "arrayobject.h":
 cdef extern from "math.h":
     double exp(double x)
 
-## gcc specific (?)
 cdef extern:
-    int __builtin_abs(int x)
+    int abs(int x)
 
 cdef int GAUSS_SAMP = 32
 cdef int GAUSS_IDX_MAX = GAUSS_SAMP - 1
 
-class _Bilat_fcn(object):
+class Bilat_fcn(object):
     '''
     The class provides the bilaterl filter function to be called by
     generic_filter.
@@ -59,7 +60,6 @@ class _Bilat_fcn(object):
 
         x = np.linspace(0,3.0, GAUSS_SAMP)
         self.gauss_lut = np.exp(-x**2/2)
-        self.gauss_lut[-1] = 0.0  # Nullify all distant deltas        
         self.x_quant = 3*inten_sig / GAUSS_IDX_MAX
 
 
@@ -112,9 +112,10 @@ class _Bilat_fcn(object):
 
         for i from  0 <= i < dim:
             dat_i = pdata[i]
-            exp_i = __builtin_abs(<int>((dat_i-centre) / x_quant))
+            exp_i = abs(<int>((dat_i-centre) / x_quant))
             if exp_i > GAUSS_IDX_MAX:
-                exp_i = GAUSS_IDX_MAX
+                #exp_i = GAUSS_IDX_MAX
+                continue
             weight_i = gauss_lut[exp_i] * pker[i]
             weight += weight_i;
             result += dat_i * weight_i
@@ -124,36 +125,3 @@ class _Bilat_fcn(object):
 #
 # Filtering functions to be called from outsize
 #
-
-
-def bilateral(mat, xy_sig, z_sig, filter_size=None, mode='reflect'):
-    '''
-    Bilateral filter a 2D array.
-      mat:         A 2D array
-      xy_sig:      The sigma of the spatial Gaussian filter.
-      z_sig:       The sigma of the gray levels Gaussian filter.
-      filter_size: Sise of the spatial filter kernel: None of values < 2 --- auto select.
-      mode:        See numpy.numarray.nd_image.generic_filter documentation
-
-    output: A 2D array of the same dimensions as mat and a float64 dtype
-
-    Remarks:
-      1. The spatial filter kernel size is ~4*xy_sig, unless specified otherwise
-      2. The algorithm is slow but has a minimal memory footprint
-    '''
-    
-    filter_fcn = _Bilat_fcn(xy_sig, z_sig, filter_size)
-    size = filter_fcn.xy_size
-    return generic_filter(mat, filter_fcn.cfilter, size =(size,size), mode=mode)
-
-def bilateral_slow(mat, xy_sig, z_sig, filter_size=None, mode='reflect'):
-    'A pure python implementation of the bilateral filter, for details see bilateral doc.'
-    filter_fcn = _Bilat_fcn(xy_sig, z_sig, filter_size)
-    size = filter_fcn.xy_size
-    return generic_filter(mat, filter_fcn, size =(size,size), mode=mode)
-
-def bilateral_fast(mat, xy_sig, z_sig, filter_size=None, mode='reflect'):
-    'A fast implementation of bilateral filter, for details see bilateral doc.'
-    filter_fcn = _Bilat_fcn(xy_sig, z_sig, filter_size)
-    size = filter_fcn.xy_size
-    return generic_filter(mat, filter_fcn.fc_filter, size =(size,size), mode=mode)
