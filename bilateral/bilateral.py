@@ -4,11 +4,15 @@
 #   The software is licenced under BSD licence.
 '''
  A front end functions for bilateral filtering.
-   The output functions
+ Provides the following functions:
+ 
      bilateral
      bilateral_slow
      bilateral_fast
-  should be roughly the same, but there should be a considerable speed factor.
+ 
+  Thier output should be roughly the same, but there should be a
+  considerable speed factor.
+  Full documentation is found in the bilateral function doc string.
 '''
 
 
