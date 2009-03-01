@@ -10,6 +10,7 @@
 '''
 
 cimport numpy as np
+import numpy as np
 
 cdef extern from "math.h":
     double exp(double x)
@@ -69,7 +70,7 @@ class Bilat_fcn(object):
         cdef double sigma   = self.inten_sig
         cdef double weight_i, weight, result, centre, dat_i
         cdef double *pdata=<double *>data.data, *pker=<double *>kernel.data
-        cdef int i, dim = data.dimensions[0]
+        cdef int i, dim = data.shape[0]
         centre = pdata[self.index]
 
         weight = 0.0
@@ -91,7 +92,7 @@ class Bilat_fcn(object):
         cdef double sigma   = self.inten_sig
         cdef double weight_i, weight, result, centre, dat_i
         cdef double *pdata=<double *>data.data, *pker=<double *>kernel.data
-        cdef int i, dim = data.dimensions[0]
+        cdef int i, dim = data.shape[0]
         cdef int exp_i    # Entry index for the LUT
         cdef double x_quant = self.x_quant
         cdef double *gauss_lut = <double *>gauss_lut_arr.data
